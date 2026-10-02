@@ -161,4 +161,151 @@ MODIFY COLUMN CEP CHAR(9);
 ALTER TABLE dependentes
 MODIFY COLUMN CEP CHAR(9);
 
+ALTER TABLE titulares
+MODIFY COLUMN Telefone CHAR(14);
+
+ALTER TABLE dependentes
+MODIFY COLUMN Telefone CHAR(14);
+
+/* --------------- inicio filmes ----------------- */
+
+SHOW TABLES;
+
+SELECT * FROM apoio_situacao;
+
+DESC filmes;
+
+SELECT * FROM filmes
+ORDER BY Situacao;
+
+/* criando a tabela com a distinção de situação */
+CREATE TABLE apoio_situacao AS 
+SELECT DISTINCT 
+	situacao
+FROM 
+	filmes;
+
+/* adicionando a coluna id como primeiro campo*/	
+ALTER TABLE apoio_situacao
+	ADD COLUMN id int NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
+	
+ALTER TABLE apoio_situacao
+DROP COLUMN id;
+
+/* atualizando o campo "Situacao" para a FN */
+UPDATE filmes fil
+LEFT JOIN apoio_situacao sit 
+	ON fil.Situacao = sit.Situacao
+SET fil.Situacao = sit.id
+WHERE fil.Situacao = sit.Situacao;
+
+ALTER TABLE filmes 
+MODIFY COLUMN situacao INT NOT NULL;
+
+/* criando a tabela com a distinção de genero */
+CREATE TABLE apoio_genero AS 
+SELECT DISTINCT 
+	genero
+FROM 
+	filmes;
+	
+/* adicionando a coluna id como primeiro campo*/	
+ALTER TABLE apoio_genero
+	ADD COLUMN id int NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
+
+/* atualizando o campo "genero" para a FN */	
+UPDATE filmes fil
+LEFT JOIN apoio_genero gen
+	ON fil.Genero = gen.genero
+SET fil.Genero = gen.id
+WHERE fil.Genero = gen.genero;
+
+ALTER TABLE filmes 
+MODIFY COLUMN genero INT NOT NULL;
+
+/* criando a tabela com a distinção de ""pais" */
+CREATE TABLE apoio_pais AS 
+SELECT DISTINCT 
+	pais
+FROM 
+	filmes;
+
+/* adicionando a coluna id como primeiro campo*/	
+ALTER TABLE apoio_pais
+	ADD COLUMN id int NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
+
+/* atualizando o campo "pais" para a FN */	
+UPDATE filmes fil
+LEFT JOIN apoio_pais pais
+	ON fil.Pais = pais.pais
+SET fil.Pais = pais.id
+WHERE fil.Pais = pais.pais;
+
+ALTER TABLE filmes 
+MODIFY COLUMN pais INT NOT NULL;
+
+/* --------------- Fim filmes ----------------- */
+/* --------------- inicio locaçao ----------------- */
+
+-- criando a tabela locacoes
+
+CREATE TABLE locacoes
+(
+	id INT(15) ZEROFILL NOT NULL AUTO_INCREMENT, 
+	Matricula_Locatario INT(15) ZEROFILL NOT NULL, 
+	id_filme INT(15) NOT NULL,
+	Data_Pedido DATE DEFAULT (CURRENT_DATE()),
+	Data_Devolucao DATE DEFAULT NULL,
+	PRIMARY KEY(id) USING BTREE  
+);
+
+DESC locacoes;
+DESC filmes;
+
+-- verificando os filmes alugados 
+
+SELECT id,Matricula_Locatario
+FROM filmes
+WHERE Matricula_Locatario
+IS NOT NULL; 
+
+INSERT INTO locacoes (id_filme,Matricula_Locatario)
+SELECT id,Matricula_Locatario
+FROM filmes
+WHERE Matricula_Locatario
+IS NOT NULL; 
+
+SELECT * FROM locacoes;
+
+ALTER TABLE filmes
+DROP COLUMN Matricula_Locatario;
+
+/* Lista 5 views  */
+
+-- Selecione todos os titulares que moram em Petrópolis
+
+CREATE VIEW vw_titulares_petropolis AS 
+SELECT  tit.Nome, tit.Endereco, tit.Bairro, cid.descricao
+FROM titulares tit
+LEFT JOIN apoio_cidades cid
+	ON tit.cidade = cid.id
+LEFT JOIN apoio_uf uf 
+	ON tit.UF = uf.id
+WHERE cid.descricao = 'Petropolis';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
